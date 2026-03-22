@@ -1,31 +1,91 @@
 <!DOCTYPE html>
-<html>
-<body style="background:black;color:white;text-align:center;font-family:Arial">
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-sinoEly</title>
 
-<script>
-let u=prompt("Usuario");
-let p=prompt("Contraseña");
-if(u!=="K-sinoEly1"||p!=="Pomelo1991$"){
-alert("Acceso denegado"); location="index.html";
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:black;
+color:white;
+text-align:center;
 }
-</script>
 
-<h2>ADMIN</h2>
+h1{color:gold}
 
-<input id="nombre" placeholder="Nombre"><br>
-<input id="numero" placeholder="Numero 00-99"><br>
+.container{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:20px;
+}
 
-<button onclick="vender()" style="background:green">➕ Vender</button>
-<button onclick="borrar()" style="background:red">➖ Liberar</button>
+.grid{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:6px;
+width:95vw;
+max-width:500px;
+}
 
-<br><br>
+.cell{
+aspect-ratio:1;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+border-radius:8px;
+background:#1fa34a;
+font-size:18px;
+}
 
-<button onclick="verLista()">📋 Ver lista</button>
+.sold{
+background:#7a1c1c;
+color:white;
+}
 
-<div id="lista"></div>
+.side{max-width:200px}
 
-<h3>Fondo</h3>
-<input type="file" onchange="subirFondo(event)">
+.star{box-shadow:0 0 10px gold}
+
+.coin{
+position:fixed;
+top:-50px;
+color:gold;
+opacity:0.4;
+animation:fall linear infinite;
+}
+
+@keyframes fall{
+to{transform:translateY(110vh)}
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Bienvenidos a la Rifa</h1>
+<h2>POZO</h2>
+<h2 id="pozo">$50.000</h2>
+
+<div class="container">
+
+<div class="grid" id="grid"></div>
+
+<div class="side">
+<h3>Vendidos: <span id="count">0</span></h3>
+
+<p>
+0 a 49 → $50.000<br>
+50 a 99 → $150.000<br>
+100 → $250.000
+</p>
+</div>
+
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
@@ -40,37 +100,60 @@ projectId:"rifa-d7efe"
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
-function vender(){
-let n=document.getElementById('nombre').value;
-let num=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
-}
+const grid=document.getElementById('grid');
+const count=document.getElementById('count');
+const pozo=document.getElementById('pozo');
 
-function borrar(){
-let num=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
-}
-
-function verLista(){
 db.collection("rifa").doc("datos").onSnapshot(doc=>{
 let data=doc.data()||{};
-let html="";
+grid.innerHTML="";
+let vendidos=0;
+
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-html+=num+" - "+(data[num]||"Vacante")+"<br>";
-}
-document.getElementById('lista').innerHTML=html;
-});
+let div=document.createElement('div');
+div.className="cell";
+
+if(data[num]){
+div.classList.add("sold");
+div.textContent="X";
+vendidos++;
+}else{
+div.textContent=num;
 }
 
-function subirFondo(e){
-let file=e.target.files[0];
-let reader=new FileReader();
-reader.onload=function(){
-db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
+grid.appendChild(div);
 }
-reader.readAsDataURL(file);
+
+count.textContent=vendidos;
+
+let p=50000;
+if(vendidos>=100)p=250000;
+else if(vendidos>=50)p=150000;
+
+pozo.textContent="$"+p.toLocaleString();
+
+if(data.fondo){
+document.body.style.backgroundImage=`url(${data.fondo})`;
+document.body.style.backgroundSize="cover";
 }
+});
+
+setInterval(()=>{
+let c=document.querySelectorAll('.cell');
+c.forEach(x=>x.classList.remove('star'));
+c[Math.floor(Math.random()*c.length)].classList.add('star');
+},2000);
+
+setInterval(()=>{
+let c=document.createElement('div');
+c.className='coin';
+c.textContent=Math.random()>0.5?"463":"💎";
+c.style.left=Math.random()*100+'vw';
+c.style.animationDuration=(Math.random()*3+2)+'s';
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),5000);
+},400);
 </script>
 
 </body>
