@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>K-sinoEly</title>
+<style>
+body{margin:0;font-family:Arial;background:black;color:white;text-align:center;overflow:hidden}
+h1{color:gold}
+.container{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;z-index:2;position:relative}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;width:95vw;max-width:500px}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:bold;border-radius:8px;background:#1f8f3a;font-size:18px;transition:0.3s}
+.sold{background:#7a1c1c;color:#fff}
+.star{box-shadow:0 0 10px gold,0 0 20px gold}
+.coin{position:fixed;top:-50px;color:gold;font-weight:bold;z-index:1;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh)}}
+.side{max-width:200px}
+</style>
+</head>
+<body>
+
+<h1>Bienvenidos a la Rifa</h1>
+<h2>POZO</h2>
+<h2 id="pozo">$50.000</h2>
+
+<div class="container">
+<div>
+<h2>K-sinoEly</h2>
+<div class="grid" id="grid"></div>
+</div>
+
+<div class="side">
+<h3>Vendidos: <span id="count">0</span></h3>
+<p>0-49 → $50.000<br>50-99 → $150.000<br>100 → $250.000</p>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
+  authDomain: "rifa-d7efe.firebaseapp.com",
+  projectId: "rifa-d7efe"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const grid=document.getElementById('grid');
+const count=document.getElementById('count');
+const pozoEl=document.getElementById('pozo');
+
+db.collection("rifa").doc("datos").onSnapshot(doc=>{
+let data=doc.data()||{};
+grid.innerHTML='';
+let vendidos=0;
+
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+let div=document.createElement('div');
+div.className='cell';
+
+if(data[num]){
+div.classList.add('sold');
+div.textContent='X';
+vendidos++;
+}else{
+div.textContent=num;
+}
+
+grid.appendChild(div);
+}
+
+count.textContent=vendidos;
+
+let pozo=50000;
+if(vendidos>=100) pozo=250000;
+else if(vendidos>=50) pozo=150000;
+
+pozoEl.textContent='$'+pozo.toLocaleString();
+
+if(data.fondo){
+document.body.style.backgroundImage=`url(${data.fondo})`;
+document.body.style.backgroundSize='cover';
+}
+});
+
+setInterval(()=>{
+let cells=document.querySelectorAll('.cell');
+cells.forEach(c=>c.classList.remove('star'));
+let rand=Math.floor(Math.random()*cells.length);
+cells[rand].classList.add('star');
+},2000);
+
+function coin(){
+let c=document.createElement('div');
+c.className='coin';
+c.textContent='463';
+c.style.left=Math.random()*100+'vw';
+c.style.animationDuration=(Math.random()*3+2)+'s';
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),5000);
+}
+setInterval(coin,400);
+</script>
+
+</body>
+</html>
