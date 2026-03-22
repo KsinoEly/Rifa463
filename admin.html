@@ -10,10 +10,10 @@ alert("Acceso denegado"); location="index.html";
 }
 </script>
 
-<h2>ADMIN</h2>
+<h2>🎛️ ADMIN</h2>
 
-<input id="nombre" placeholder="Nombre"><br>
-<input id="numero" placeholder="Numero 00-99"><br>
+<input id="nombre" placeholder="Nombre"><br><br>
+<input id="numero" placeholder="Numero 00-99"><br><br>
 
 <button onclick="vender()" style="background:green">➕ Vender</button>
 <button onclick="borrar()" style="background:red">➖ Liberar</button>
@@ -24,8 +24,12 @@ alert("Acceso denegado"); location="index.html";
 
 <div id="lista"></div>
 
-<h3>Fondo</h3>
+<h3>🖼️ Fondo</h3>
 <input type="file" onchange="subirFondo(event)">
+
+<h3>📲 WhatsApp</h3>
+<input id="telefono" placeholder="5491122334455"><br><br>
+<button onclick="guardarWhatsApp()">Guardar WhatsApp</button>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
@@ -70,6 +74,11 @@ reader.onload=function(){
 db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
 }
 reader.readAsDataURL(file);
+}
+
+function guardarWhatsApp(){
+let numero=document.getElementById('telefono').value;
+db.collection("rifa").doc("datos").set({whatsapp:numero},{merge:true});
 }
 </script>
 
