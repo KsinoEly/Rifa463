@@ -11,23 +11,28 @@ font-family:Arial;
 background:black;
 color:white;
 text-align:center;
+overflow-x:hidden;
 }
 
-h1{color:gold}
+h1{
+color:gold;
+text-shadow:0 0 15px gold;
+}
 
 .container{
 display:flex;
 flex-wrap:wrap;
 justify-content:center;
-gap:20px;
+gap:30px;
+padding:10px;
 }
 
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
-gap:6px;
+gap:8px;
 width:95vw;
-max-width:500px;
+max-width:520px;
 }
 
 .cell{
@@ -36,19 +41,49 @@ display:flex;
 align-items:center;
 justify-content:center;
 font-weight:bold;
-border-radius:8px;
-background:#1fa34a;
+border-radius:10px;
+background:linear-gradient(145deg,#1fa34a,#0b5f2b);
 font-size:18px;
+box-shadow:0 0 10px #0f0;
+transition:0.2s;
+cursor:pointer;
+}
+
+.cell:hover{
+transform:scale(1.1);
+box-shadow:0 0 15px gold;
 }
 
 .sold{
-background:#7a1c1c;
-color:white;
+background:linear-gradient(145deg,#7a1c1c,#3b0000);
+box-shadow:0 0 10px red;
+cursor:default;
 }
 
-.side{max-width:200px}
+.side{
+background:rgba(0,0,0,0.6);
+padding:15px;
+border-radius:10px;
+box-shadow:0 0 10px gold;
+}
 
-.star{box-shadow:0 0 10px gold}
+.star{
+box-shadow:0 0 15px gold !important;
+}
+
+#wsp{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+font-size:28px;
+padding:15px;
+border-radius:50%;
+text-decoration:none;
+box-shadow:0 0 15px black;
+z-index:999;
+}
 
 .coin{
 position:fixed;
@@ -62,12 +97,12 @@ animation:fall linear infinite;
 to{transform:translateY(110vh)}
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>Bienvenidos a la Rifa</h1>
+<h1>🎰 K-SINO ELY 🎰</h1>
+
 <h2>POZO</h2>
 <h2 id="pozo">$50.000</h2>
 
@@ -86,6 +121,8 @@ to{transform:translateY(110vh)}
 </div>
 
 </div>
+
+<a id="wsp" target="_blank">💬</a>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
@@ -120,6 +157,14 @@ div.textContent="X";
 vendidos++;
 }else{
 div.textContent=num;
+
+div.onclick=()=>{
+if(data.whatsapp){
+let msg="Hola quiero el número "+num+" de la rifa";
+let url="https://wa.me/"+data.whatsapp+"?text="+encodeURIComponent(msg);
+window.open(url,"_blank");
+}
+}
 }
 
 grid.appendChild(div);
@@ -134,8 +179,13 @@ else if(vendidos>=50)p=150000;
 pozo.textContent="$"+p.toLocaleString();
 
 if(data.fondo){
-document.body.style.backgroundImage=`url(${data.fondo})`;
+document.body.style.backgroundImage=url(${data.fondo});
 document.body.style.backgroundSize="cover";
+}
+
+let wsp=document.getElementById('wsp');
+if(data.whatsapp){
+wsp.href="https://wa.me/"+data.whatsapp;
 }
 });
 
@@ -148,7 +198,7 @@ c[Math.floor(Math.random()*c.length)].classList.add('star');
 setInterval(()=>{
 let c=document.createElement('div');
 c.className='coin';
-c.textContent=Math.random()>0.5?"463":"💎";
+c.textContent=Math.random()>0.5?"💰":"💎";
 c.style.left=Math.random()*100+'vw';
 c.style.animationDuration=(Math.random()*3+2)+'s';
 document.body.appendChild(c);
