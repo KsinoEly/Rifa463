@@ -1,3 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Rifa 463</title>
+
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+text-align:center;
+font-family:Arial;
+overflow-x:hidden;
+}
+
+h1{color:gold;margin:10px}
+h2{margin:5px}
+
+/* POZO COLORES */
+.pozo-verde{color:#00e676}
+.pozo-amarillo{color:#ffd600}
+.pozo-rojo{color:#ff1744}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(10,1fr);
+gap:8px;
+width:95vw;
+max-width:520px;
+margin:auto;
+}
+
+/* CELDAS */
+.cell{
+aspect-ratio:1;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+background:#00c853;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 0 10px #00ff88;
+transition:0.2s;
+}
+
+.cell:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px #00ff88;
+}
+
+/* VENDIDO */
+.sold{
+background:#d50000;
+box-shadow:0 0 15px red;
+}
+
+/* INFO */
+.info{margin:10px}
+
+/* WHATSAPP */
+#wsp{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+padding:18px;
+border-radius:50%;
+font-size:22px;
+text-decoration:none;
+box-shadow:0 0 20px #25D366;
+}
+
+/* MONEDAS */
+.coin{
+position:fixed;
+top:-50px;
+color:gold;
+opacity:0.4;
+animation:fall linear infinite;
+}
+
+@keyframes fall{
+to{transform:translateY(110vh)}
+}
+
+/* DESTELLOS */
+.star{
+box-shadow:0 0 25px gold;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🎰 RIFA 463 🎰</h1>
+
+<h2>💰 POZO</h2>
+<h2 id="pozo" class="pozo-verde">$50.000</h2>
+
+<div style="margin:10px;font-size:14px;color:#ccc">
+<p>🟢 00 a 49 → $50.000</p>
+<p>🟡 50 a 95 → $150.000</p>
+<p>🔴 95 a 99 → $250.000</p>
+</div>
+
+<div class="info">
+Vendidos: <span id="count">0</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<a id="wsp" target="_blank">💬</a>
+
+<!-- 🔊 SONIDO -->
+<audio id="bgSound" loop>
+<source src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1936.mp3">
+</audio>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
 <script>
 const firebaseConfig={
 apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
@@ -12,33 +137,34 @@ const grid=document.getElementById('grid');
 const count=document.getElementById('count');
 const pozo=document.getElementById('pozo');
 
+/* SONIDO */
+document.body.addEventListener("click",()=>{
+document.getElementById("bgSound").volume=0.2;
+document.getElementById("bgSound").play();
+},{once:true});
+
+/* TIEMPO REAL */
 db.collection("rifa").doc("datos").onSnapshot(doc=>{
 let data=doc.data()||{};
 grid.innerHTML="";
 let vendidos=0;
 
+/* GRILLA */
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 let div=document.createElement('div');
 div.className="cell";
 
-/* SI ESTA VENDIDO */
 if(data[num]){
 div.classList.add("sold");
-div.innerHTML = <span class="num">${num}</span><span class="x">✖</span>;
+div.innerText="❌";
 vendidos++;
-}
+}else{
+div.innerText=num;
 
-/* SI ESTA DISPONIBLE */
-else{
-div.innerHTML = <span class="num">${num}</span>;
-
-/* CLICK WHATSAPP */
 div.onclick=()=>{
 if(data.whatsapp){
-let msg="Hola quiero el número "+num+" de la rifa";
-let url="https://wa.me/"+data.whatsapp+"?text="+encodeURIComponent(msg);
-window.open(url,"_blank");
+window.open("https://wa.me/"+data.whatsapp+"?text=Quiero el numero "+num);
 }
 }
 }
@@ -46,38 +172,38 @@ window.open(url,"_blank");
 grid.appendChild(div);
 }
 
+/* CONTADOR */
 count.textContent=vendidos;
 
-/* POZO */
+/* POZO DINAMICO */
 let p=50000;
-if(vendidos>=100)p=250000;
-else if(vendidos>=50)p=150000;
+
+pozo.classList.remove("pozo-verde","pozo-amarillo","pozo-rojo");
+
+if(vendidos>=95){
+p=250000;
+pozo.classList.add("pozo-rojo");
+}else if(vendidos>=50){
+p=150000;
+pozo.classList.add("pozo-amarillo");
+}else{
+pozo.classList.add("pozo-verde");
+}
 
 pozo.textContent="$"+p.toLocaleString();
 
-/* FONDO */
-if(data.fondo){
-document.body.style.backgroundImage=url(${data.fondo});
-document.body.style.backgroundSize="cover";
-}
-
-/* BOTON WHATSAPP */
-let wsp=document.getElementById('wsp');
+/* WHATSAPP */
 if(data.whatsapp){
-wsp.href="https://wa.me/"+data.whatsapp;
+document.getElementById('wsp').href="https://wa.me/"+data.whatsapp;
 }
 });
 
 /* DESTELLOS */
 setInterval(()=>{
-let c=document.querySelectorAll('.cell:not(.sold)');
-if(c.length===0)return;
-
-let r=c[Math.floor(Math.random()*c.length)];
-r.classList.add('star');
-
-setTimeout(()=>r.classList.remove('star'),800);
-},1200);
+let c=document.querySelectorAll('.cell');
+c.forEach(x=>x.classList.remove('star'));
+c[Math.floor(Math.random()*c.length)].classList.add('star');
+},2000);
 
 /* MONEDAS */
 setInterval(()=>{
@@ -90,3 +216,6 @@ document.body.appendChild(c);
 setTimeout(()=>c.remove(),5000);
 },400);
 </script>
+
+</body>
+</html>
