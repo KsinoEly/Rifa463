@@ -1,36 +1,50 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Rifa</title>
+</head>
+
 <body style="background:black;color:white;text-align:center;font-family:Arial">
 
 <script>
 let u=prompt("Usuario");
 let p=prompt("Contraseña");
-if(u!=="K-sinoEly1"||p!=="Pomelo1991$"){
-alert("Acceso denegado"); location="index.html";
+if(u!=="admin"||p!=="1234"){
+alert("Acceso denegado");
+location="index.html";
 }
 </script>
 
-<h2>🎛️ ADMIN</h2>
+<h2>🔐 PANEL ADMIN</h2>
 
-<input id="nombre" placeholder="Nombre"><br><br>
-<input id="numero" placeholder="Numero 00-99"><br><br>
+<br>
 
-<button onclick="vender()" style="background:green">➕ Vender</button>
-<button onclick="borrar()" style="background:red">➖ Liberar</button>
+<input id="nombre" placeholder="Nombre del comprador" style="padding:10px;width:200px"><br><br>
+<input id="numero" placeholder="Numero 00-99" style="padding:10px;width:200px"><br><br>
+
+<button onclick="vender()" style="padding:10px 20px;background:green;color:white">➕ Vender</button>
+<button onclick="borrar()" style="padding:10px 20px;background:red;color:white">➖ Liberar</button>
 
 <br><br>
 
-<button onclick="verLista()">📋 Ver lista</button>
+<h3>📱 WhatsApp</h3>
+<input id="tel" placeholder="549XXXXXXXXXX" style="padding:10px;width:200px"><br><br>
+<button onclick="guardar()" style="padding:10px 20px">Guardar WhatsApp</button>
 
-<div id="lista"></div>
+<br><br>
 
-<h3>🖼️ Fondo</h3>
-<input type="file" onchange="subirFondo(event)">
+<button onclick="verLista()" style="padding:10px 20px;background:#333;color:white">📋 Ver lista en vivo</button>
 
-<h3>📲 WhatsApp</h3>
-<input id="telefono" placeholder="5491122334455"><br><br>
-<button onclick="guardarWhatsApp()">Guardar WhatsApp</button>
+<div id="lista" style="margin-top:15px;font-size:14px"></div>
 
+<br><br>
+
+<button onclick="finalizar()" style="padding:12px 25px;background:gold;color:black;font-weight:bold">
+💣 FINALIZAR Y DESCARGAR
+</button>
+
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
@@ -44,41 +58,80 @@ projectId:"rifa-d7efe"
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
+/* ➕ VENDER */
 function vender(){
 let n=document.getElementById('nombre').value;
 let num=document.getElementById('numero').value.padStart(2,'0');
+
+if(!n || num<0 || num>99){
+alert("Datos inválidos");
+return;
+}
+
 db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
 }
 
+/* ➖ LIBERAR */
 function borrar(){
 let num=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
+
+db.collection("rifa").doc("datos").update({
+[num]:firebase.firestore.FieldValue.delete()
+});
 }
 
+/* 📱 WHATSAPP */
+function guardar(){
+let t=document.getElementById('tel').value;
+db.collection("rifa").doc("datos").set({whatsapp:t},{merge:true});
+alert("WhatsApp guardado");
+}
+
+/* 📋 LISTA EN VIVO */
 function verLista(){
 db.collection("rifa").doc("datos").onSnapshot(doc=>{
 let data=doc.data()||{};
 let html="";
+
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-html+=num+" - "+(data[num]||"Vacante")+"<br>";
+html+= num + " - " + (data[num] || "Disponible") + "<br>";
 }
+
 document.getElementById('lista').innerHTML=html;
 });
 }
 
-function subirFondo(e){
-let file=e.target.files[0];
-let reader=new FileReader();
-reader.onload=function(){
-db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
-}
-reader.readAsDataURL(file);
+/* 💣 FINALIZAR */
+function finalizar(){
+
+if(!confirm("¿Seguro que querés finalizar la rifa?")){
+return;
 }
 
-function guardarWhatsApp(){
-let numero=document.getElementById('telefono').value;
-db.collection("rifa").doc("datos").set({whatsapp:numero},{merge:true});
+db.collection("rifa").doc("datos").get().then(doc=>{
+let data=doc.data()||{};
+let csv="Numero,Nombre\\n";
+
+/* CREAR EXCEL */
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+let nombre=data[num]||"";
+csv+=num+","+nombre+"\\n";
+}
+
+/* DESCARGAR */
+let blob=new Blob([csv],{type:'text/csv'});
+let a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download="rifa_resultado.csv";
+a.click();
+
+/* RESET TOTAL */
+db.collection("rifa").doc("datos").set({});
+
+alert("Rifa finalizada y reiniciada");
+});
 }
 </script>
 
