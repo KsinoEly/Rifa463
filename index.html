@@ -5,24 +5,9 @@
 <title>Rifa 463</title>
 
 <style>
-body{
-margin:0;
-background:black;
-color:white;
-text-align:center;
-font-family:Arial;
-overflow-x:hidden;
-}
-
+body{margin:0;background:black;color:white;text-align:center;font-family:Arial}
 h1{color:gold;margin:10px}
-h2{margin:5px}
 
-/* POZO COLORES */
-.pozo-verde{color:#00e676}
-.pozo-amarillo{color:#ffd600}
-.pozo-rojo{color:#ff1744}
-
-/* GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
@@ -32,7 +17,6 @@ max-width:520px;
 margin:auto;
 }
 
-/* CELDAS */
 .cell{
 aspect-ratio:1;
 display:flex;
@@ -41,57 +25,11 @@ justify-content:center;
 border-radius:10px;
 background:#00c853;
 font-weight:bold;
-font-size:16px;
 box-shadow:0 0 10px #00ff88;
-transition:0.2s;
 }
 
-.cell:hover{
-transform:scale(1.1);
-box-shadow:0 0 20px #00ff88;
-}
-
-/* VENDIDO */
-.sold{
-background:#d50000;
-box-shadow:0 0 15px red;
-}
-
-/* INFO */
-.info{margin:10px}
-
-/* WHATSAPP */
-#wsp{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#25D366;
-padding:18px;
-border-radius:50%;
-font-size:22px;
-text-decoration:none;
-box-shadow:0 0 20px #25D366;
-}
-
-/* MONEDAS */
-.coin{
-position:fixed;
-top:-50px;
-color:gold;
-opacity:0.4;
-animation:fall linear infinite;
-}
-
-@keyframes fall{
-to{transform:translateY(110vh)}
-}
-
-/* DESTELLOS */
-.star{
-box-shadow:0 0 25px gold;
-}
+.sold{background:#d50000}
 </style>
-
 </head>
 
 <body>
@@ -99,57 +37,32 @@ box-shadow:0 0 25px gold;
 <h1>🎰 RIFA 463 🎰</h1>
 
 <h2>💰 POZO</h2>
-<h2 id="pozo" class="pozo-verde">$50.000</h2>
+<h2 id="pozo">$50.000</h2>
 
-<div style="margin:10px;font-size:14px;color:#ccc">
-<p>🟢 00 a 49 → $50.000</p>
-<p>🟡 50 a 95 → $150.000</p>
-<p>🔴 95 a 99 → $250.000</p>
+<div>
+🟢 00 a 49 → $50.000<br>
+🟡 50 a 95 → $150.000<br>
+🔴 95 a 99 → $250.000
 </div>
 
-<div class="info">
-Vendidos: <span id="count">0</span>
-</div>
+<p>Vendidos: <span id="count">0</span></p>
 
 <div class="grid" id="grid"></div>
-
-<a id="wsp" target="_blank">💬</a>
-
-<!-- 🔊 SONIDO -->
-<audio id="bgSound" loop>
-<source src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-spin-1936.mp3">
-</audio>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
 <script>
-const firebaseConfig={
-apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
-authDomain:"rifa-d7efe.firebaseapp.com",
-projectId:"rifa-d7efe"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-
 const grid=document.getElementById('grid');
 const count=document.getElementById('count');
 const pozo=document.getElementById('pozo');
 
-/* SONIDO */
-document.body.addEventListener("click",()=>{
-document.getElementById("bgSound").volume=0.2;
-document.getElementById("bgSound").play();
-},{once:true});
+/* 🧠 FUNCION QUE SIEMPRE DIBUJA */
+function dibujar(data={}){
 
-/* TIEMPO REAL */
-db.collection("rifa").doc("datos").onSnapshot(doc=>{
-let data=doc.data()||{};
 grid.innerHTML="";
 let vendidos=0;
 
-/* GRILLA */
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 let div=document.createElement('div');
@@ -161,12 +74,6 @@ div.innerText="❌";
 vendidos++;
 }else{
 div.innerText=num;
-
-div.onclick=()=>{
-if(data.whatsapp){
-window.open("https://wa.me/"+data.whatsapp+"?text=Quiero el numero "+num);
-}
-}
 }
 
 grid.appendChild(div);
@@ -175,46 +82,37 @@ grid.appendChild(div);
 /* CONTADOR */
 count.textContent=vendidos;
 
-/* POZO DINAMICO */
+/* POZO */
 let p=50000;
-
-pozo.classList.remove("pozo-verde","pozo-amarillo","pozo-rojo");
-
-if(vendidos>=95){
-p=250000;
-pozo.classList.add("pozo-rojo");
-}else if(vendidos>=50){
-p=150000;
-pozo.classList.add("pozo-amarillo");
-}else{
-pozo.classList.add("pozo-verde");
-}
+if(vendidos>=95)p=250000;
+else if(vendidos>=50)p=150000;
 
 pozo.textContent="$"+p.toLocaleString();
-
-/* WHATSAPP */
-if(data.whatsapp){
-document.getElementById('wsp').href="https://wa.me/"+data.whatsapp;
 }
+
+/* 👇 DIBUJA AUNQUE FIREBASE FALLE */
+dibujar();
+
+/* 🔥 FIREBASE */
+try{
+
+const firebaseConfig={
+apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
+authDomain:"rifa-d7efe.firebaseapp.com",
+projectId:"rifa-d7efe"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+
+/* TIEMPO REAL */
+db.collection("rifa").doc("datos").onSnapshot(doc=>{
+dibujar(doc.data()||{});
 });
 
-/* DESTELLOS */
-setInterval(()=>{
-let c=document.querySelectorAll('.cell');
-c.forEach(x=>x.classList.remove('star'));
-c[Math.floor(Math.random()*c.length)].classList.add('star');
-},2000);
-
-/* MONEDAS */
-setInterval(()=>{
-let c=document.createElement('div');
-c.className='coin';
-c.textContent=Math.random()>0.5?"💰":"💎";
-c.style.left=Math.random()*100+'vw';
-c.style.animationDuration=(Math.random()*3+2)+'s';
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),5000);
-},400);
+}catch(e){
+console.log("Firebase no cargó, pero la grilla funciona igual");
+}
 </script>
 
 </body>
