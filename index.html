@@ -1,91 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>K-sinoEly</title>
+<html>
+<body style="background:black;color:white;text-align:center;font-family:Arial">
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:black;
-color:white;
-text-align:center;
+<script>
+let u=prompt("Usuario");
+let p=prompt("Contraseña");
+if(u!=="K-sinoEly1"||p!=="Pomelo1991$"){
+alert("Acceso denegado"); location="index.html";
 }
+</script>
 
-h1{color:gold}
+<h2>ADMIN</h2>
 
-.container{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:20px;
-}
+<input id="nombre" placeholder="Nombre"><br>
+<input id="numero" placeholder="Numero 00-99"><br>
 
-.grid{
-display:grid;
-grid-template-columns:repeat(10,1fr);
-gap:6px;
-width:95vw;
-max-width:500px;
-}
+<button onclick="vender()" style="background:green">➕ Vender</button>
+<button onclick="borrar()" style="background:red">➖ Liberar</button>
 
-.cell{
-aspect-ratio:1;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-border-radius:8px;
-background:#1fa34a;
-font-size:18px;
-}
+<br><br>
 
-.sold{
-background:#7a1c1c;
-color:white;
-}
+<button onclick="verLista()">📋 Ver lista</button>
 
-.side{max-width:200px}
+<div id="lista"></div>
 
-.star{box-shadow:0 0 10px gold}
-
-.coin{
-position:fixed;
-top:-50px;
-color:gold;
-opacity:0.4;
-animation:fall linear infinite;
-}
-
-@keyframes fall{
-to{transform:translateY(110vh)}
-}
-</style>
-
-</head>
-
-<body>
-
-<h1>Bienvenidos a la Rifa</h1>
-<h2>POZO</h2>
-<h2 id="pozo">$50.000</h2>
-
-<div class="container">
-
-<div class="grid" id="grid"></div>
-
-<div class="side">
-<h3>Vendidos: <span id="count">0</span></h3>
-
-<p>
-0 a 49 → $50.000<br>
-50 a 99 → $150.000<br>
-100 → $250.000
-</p>
-</div>
-
-</div>
+<h3>Fondo</h3>
+<input type="file" onchange="subirFondo(event)">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
@@ -100,60 +40,37 @@ projectId:"rifa-d7efe"
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
-const grid=document.getElementById('grid');
-const count=document.getElementById('count');
-const pozo=document.getElementById('pozo');
+function vender(){
+let n=document.getElementById('nombre').value;
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
+}
 
+function borrar(){
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
+}
+
+function verLista(){
 db.collection("rifa").doc("datos").onSnapshot(doc=>{
 let data=doc.data()||{};
-grid.innerHTML="";
-let vendidos=0;
-
+let html="";
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-let div=document.createElement('div');
-div.className="cell";
-
-if(data[num]){
-div.classList.add("sold");
-div.textContent="X";
-vendidos++;
-}else{
-div.textContent=num;
+html+=num+" - "+(data[num]||"Vacante")+"<br>";
 }
-
-grid.appendChild(div);
-}
-
-count.textContent=vendidos;
-
-let p=50000;
-if(vendidos>=100)p=250000;
-else if(vendidos>=50)p=150000;
-
-pozo.textContent="$"+p.toLocaleString();
-
-if(data.fondo){
-document.body.style.backgroundImage=`url(${data.fondo})`;
-document.body.style.backgroundSize="cover";
-}
+document.getElementById('lista').innerHTML=html;
 });
+}
 
-setInterval(()=>{
-let c=document.querySelectorAll('.cell');
-c.forEach(x=>x.classList.remove('star'));
-c[Math.floor(Math.random()*c.length)].classList.add('star');
-},2000);
-
-setInterval(()=>{
-let c=document.createElement('div');
-c.className='coin';
-c.textContent=Math.random()>0.5?"463":"💎";
-c.style.left=Math.random()*100+'vw';
-c.style.animationDuration=(Math.random()*3+2)+'s';
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),5000);
-},400);
+function subirFondo(e){
+let file=e.target.files[0];
+let reader=new FileReader();
+reader.onload=function(){
+db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
+}
+reader.readAsDataURL(file);
+}
 </script>
 
 </body>
