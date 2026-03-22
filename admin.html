@@ -6,7 +6,7 @@
 let u=prompt("Usuario");
 let p=prompt("Contraseña");
 if(u!=="K-sinoEly1"||p!=="Pomelo1991$"){
-alert("No permitido"); location="index.html";
+alert("Acceso denegado"); location="index.html";
 }
 </script>
 
@@ -18,7 +18,10 @@ alert("No permitido"); location="index.html";
 <button onclick="vender()" style="background:green">➕ Vender</button>
 <button onclick="borrar()" style="background:red">➖ Liberar</button>
 
-<h3>Listado</h3>
+<br><br>
+
+<button onclick="verLista()">📋 Ver lista</button>
+
 <div id="lista"></div>
 
 <h3>Fondo</h3>
@@ -37,31 +40,27 @@ projectId:"rifa-d7efe"
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 
-const lista=document.getElementById('lista');
+function vender(){
+let n=document.getElementById('nombre').value;
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
+}
 
-function actualizar(){
-db.collection("rifa").doc("datos").get().then(doc=>{
+function borrar(){
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
+}
+
+function verLista(){
+db.collection("rifa").doc("datos").onSnapshot(doc=>{
 let data=doc.data()||{};
 let html="";
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 html+=num+" - "+(data[num]||"Vacante")+"<br>";
 }
-lista.innerHTML=html;
+document.getElementById('lista').innerHTML=html;
 });
-}
-
-function vender(){
-let n=document.getElementById('nombre').value;
-let num=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
-actualizar();
-}
-
-function borrar(){
-let num=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
-actualizar();
 }
 
 function subirFondo(e){
@@ -72,8 +71,6 @@ db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
 }
 reader.readAsDataURL(file);
 }
-
-setInterval(actualizar,2000);
 </script>
 
 </body>
