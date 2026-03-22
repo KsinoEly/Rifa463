@@ -3,12 +3,10 @@
 <body style="background:black;color:white;text-align:center;font-family:Arial">
 
 <script>
-let user = prompt("Usuario:");
-let pass = prompt("Contraseña:");
-
-if(user !== "K-sinoEly1" || pass !== "Pomelo1991$"){
-  alert("Acceso denegado");
-  window.location.href = "index.html";
+let u=prompt("Usuario");
+let p=prompt("Contraseña");
+if(u!=="K-sinoEly1"||p!=="Pomelo1991$"){
+alert("No permitido"); location="index.html";
 }
 </script>
 
@@ -17,57 +15,62 @@ if(user !== "K-sinoEly1" || pass !== "Pomelo1991$"){
 <input id="nombre" placeholder="Nombre"><br>
 <input id="numero" placeholder="Numero 00-99"><br>
 
-<button onclick="sumar()" style="background:green;color:white">➕ Vender</button>
-<button onclick="restar()" style="background:red;color:white">➖ Liberar</button>
+<button onclick="vender()" style="background:green">➕ Vender</button>
+<button onclick="borrar()" style="background:red">➖ Liberar</button>
 
-<h3>Lista</h3>
+<h3>Listado</h3>
 <div id="lista"></div>
 
-<button onclick="fondo()">Cambiar fondo</button>
+<h3>Fondo</h3>
+<input type="file" onchange="subirFondo(event)">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
-  authDomain: "rifa-d7efe.firebaseapp.com",
-  projectId: "rifa-d7efe"
+const firebaseConfig={
+apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
+authDomain:"rifa-d7efe.firebaseapp.com",
+projectId:"rifa-d7efe"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db=firebase.firestore();
 
 const lista=document.getElementById('lista');
 
 function actualizar(){
 db.collection("rifa").doc("datos").get().then(doc=>{
 let data=doc.data()||{};
-let html='';
+let html="";
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-html+=num+' - '+(data[num]||'Vacante')+'<br>';
+html+=num+" - "+(data[num]||"Vacante")+"<br>";
 }
 lista.innerHTML=html;
 });
 }
 
-function sumar(){
-let nombre=document.getElementById('nombre').value;
-let numero=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").set({[numero]:nombre},{merge:true});
+function vender(){
+let n=document.getElementById('nombre').value;
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").set({[num]:n},{merge:true});
 actualizar();
 }
 
-function restar(){
-let numero=document.getElementById('numero').value.padStart(2,'0');
-db.collection("rifa").doc("datos").update({[numero]:firebase.firestore.FieldValue.delete()});
+function borrar(){
+let num=document.getElementById('numero').value.padStart(2,'0');
+db.collection("rifa").doc("datos").update({[num]:firebase.firestore.FieldValue.delete()});
 actualizar();
 }
 
-function fondo(){
-let url=prompt('URL imagen');
-db.collection("rifa").doc("datos").set({fondo:url},{merge:true});
+function subirFondo(e){
+let file=e.target.files[0];
+let reader=new FileReader();
+reader.onload=function(){
+db.collection("rifa").doc("datos").set({fondo:reader.result},{merge:true});
+}
+reader.readAsDataURL(file);
 }
 
 setInterval(actualizar,2000);
