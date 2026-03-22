@@ -11,20 +11,10 @@ font-family:Arial;
 background:black;
 color:white;
 text-align:center;
-overflow-x:hidden;
 }
 
-/* POZO */
-.pozo-box{
-background:linear-gradient(45deg,gold,#222,gold);
-padding:10px;
-margin:10px auto;
-width:80%;
-border-radius:10px;
-box-shadow:0 0 20px gold;
-}
+h1{color:gold}
 
-/* CONTENEDOR */
 .container{
 display:flex;
 flex-wrap:wrap;
@@ -32,13 +22,12 @@ justify-content:center;
 gap:20px;
 }
 
-/* GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
-gap:8px;
+gap:6px;
 width:95vw;
-max-width:600px;
+max-width:500px;
 }
 
 .cell{
@@ -47,10 +36,9 @@ display:flex;
 align-items:center;
 justify-content:center;
 font-weight:bold;
-border-radius:10px;
+border-radius:8px;
 background:#1fa34a;
-font-size:22px;
-transition:0.3s;
+font-size:18px;
 }
 
 .sold{
@@ -58,36 +46,20 @@ background:#7a1c1c;
 color:white;
 }
 
-/* DESTELLO */
-.star{
-box-shadow:0 0 12px gold,0 0 25px gold;
-}
+.side{max-width:200px}
 
-/* LADO DERECHO */
-.side{
-max-width:220px;
-}
+.star{box-shadow:0 0 10px gold}
 
-/* MONEDAS */
 .coin{
 position:fixed;
 top:-50px;
 color:gold;
-font-weight:bold;
-opacity:0.5;
-z-index:0;
+opacity:0.4;
 animation:fall linear infinite;
 }
 
 @keyframes fall{
-to{transform:translateY(110vh);}
-}
-
-/* PIE */
-.footer{
-margin-top:20px;
-font-size:20px;
-color:gold;
+to{transform:translateY(110vh)}
 }
 </style>
 
@@ -96,20 +68,15 @@ color:gold;
 <body>
 
 <h1>Bienvenidos a la Rifa</h1>
-
-<div class="pozo-box">
 <h2>POZO</h2>
-<h1 id="pozo">$50.000</h1>
-</div>
+<h2 id="pozo">$50.000</h2>
 
 <div class="container">
 
-<div>
 <div class="grid" id="grid"></div>
-</div>
 
 <div class="side">
-<h2>Vendidos: <span id="count">0</span></h2>
+<h3>Vendidos: <span id="count">0</span></h3>
 
 <p>
 0 a 49 → $50.000<br>
@@ -120,79 +87,70 @@ color:gold;
 
 </div>
 
-<div class="footer">K-sino Ely</div>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
 <script>
-const firebaseConfig = {
-apiKey: "AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
-authDomain: "rifa-d7efe.firebaseapp.com",
-projectId: "rifa-d7efe"
+const firebaseConfig={
+apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
+authDomain:"rifa-d7efe.firebaseapp.com",
+projectId:"rifa-d7efe"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db=firebase.firestore();
 
-const grid = document.getElementById('grid');
-const count = document.getElementById('count');
-const pozoEl = document.getElementById('pozo');
+const grid=document.getElementById('grid');
+const count=document.getElementById('count');
+const pozo=document.getElementById('pozo');
 
 db.collection("rifa").doc("datos").onSnapshot(doc=>{
-let data = doc.data() || {};
-grid.innerHTML = '';
-
-let vendidos = 0;
+let data=doc.data()||{};
+grid.innerHTML="";
+let vendidos=0;
 
 for(let i=0;i<100;i++){
-let num = i.toString().padStart(2,'0');
-
-let div = document.createElement('div');
-div.className = 'cell';
+let num=i.toString().padStart(2,'0');
+let div=document.createElement('div');
+div.className="cell";
 
 if(data[num]){
-div.classList.add('sold');
-div.textContent = "X";
+div.classList.add("sold");
+div.textContent="X";
 vendidos++;
 }else{
-div.textContent = num;
+div.textContent=num;
 }
 
 grid.appendChild(div);
 }
 
-count.textContent = vendidos;
+count.textContent=vendidos;
 
-// POZO
-let pozo = 50000;
-if(vendidos >= 100) pozo = 250000;
-else if(vendidos >= 50) pozo = 150000;
+let p=50000;
+if(vendidos>=100)p=250000;
+else if(vendidos>=50)p=150000;
 
-pozoEl.textContent = "$" + pozo.toLocaleString();
+pozo.textContent="$"+p.toLocaleString();
 
-// FONDO
 if(data.fondo){
-document.body.style.backgroundImage = `url(${data.fondo})`;
-document.body.style.backgroundSize = "cover";
+document.body.style.backgroundImage=`url(${data.fondo})`;
+document.body.style.backgroundSize="cover";
 }
 });
 
-// DESTELLOS
 setInterval(()=>{
-let cells = document.querySelectorAll('.cell');
-cells.forEach(c=>c.classList.remove('star'));
-cells[Math.floor(Math.random()*cells.length)].classList.add('star');
+let c=document.querySelectorAll('.cell');
+c.forEach(x=>x.classList.remove('star'));
+c[Math.floor(Math.random()*c.length)].classList.add('star');
 },2000);
 
-// MONEDAS + DIAMANTES
 setInterval(()=>{
-let c = document.createElement('div');
-c.className = 'coin';
-c.textContent = Math.random()>0.5 ? "463" : "💎";
-c.style.left = Math.random()*100 + 'vw';
-c.style.animationDuration = (Math.random()*3+2)+'s';
+let c=document.createElement('div');
+c.className='coin';
+c.textContent=Math.random()>0.5?"463":"💎";
+c.style.left=Math.random()*100+'vw';
+c.style.animationDuration=(Math.random()*3+2)+'s';
 document.body.appendChild(c);
 setTimeout(()=>c.remove(),5000);
 },400);
