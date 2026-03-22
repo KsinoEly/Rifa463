@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body style="background:black;color:white;text-align:center;font-family:Arial">
+
+<h2>ADMIN</h2>
+
+<input id="nombre" placeholder="Nombre"><br>
+<input id="numero" placeholder="Numero 00-99"><br>
+<button onclick="guardar()">Guardar</button><br><br>
+
+<button onclick="fondo()">Cambiar fondo</button>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
+  authDomain: "rifa-d7efe.firebaseapp.com",
+  projectId: "rifa-d7efe"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function guardar(){
+let nombre=document.getElementById('nombre').value;
+let numero=document.getElementById('numero').value.padStart(2,'0');
+
+db.collection("rifa").doc("datos")
+.set({[numero]:nombre},{merge:true});
+}
+
+function fondo(){
+let url=prompt('URL imagen');
+db.collection("rifa").doc("datos")
+.set({fondo:url},{merge:true});
+}
+</script>
+
+</body>
+</html>
