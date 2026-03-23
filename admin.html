@@ -2,6 +2,14 @@
 <html>
 <body style="background:black;color:white;text-align:center;font-family:Arial">
 
+<div id="login">
+<h2>🔒 LOGIN</h2>
+<input id="pass" placeholder="Contraseña"><br><br>
+<button onclick="login()">Entrar</button>
+</div>
+
+<div id="panel" style="display:none">
+
 <h2>🔐 ADMIN</h2>
 
 <input id="nombre" placeholder="Nombre"><br><br>
@@ -12,9 +20,17 @@
 
 <br><br>
 
-<button onclick="verLista()">📋 Ver lista</button>
+<input id="fondo" placeholder="URL fondo"><br><br>
+<button onclick="guardarFondo()">🖼️ Fondo</button>
 
-<div id="lista"></div>
+<br><br>
+
+<button onclick="verLista()">📋 Ver lista</button>
+<button onclick="finalizar()">🏁 Finalizar</button>
+
+<div id="lista" style="display:none"></div>
+
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -28,6 +44,16 @@ projectId:"rifa-d7efe"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+/* LOGIN */
+window.login = function(){
+if(document.getElementById('pass').value==="1234"){
+document.getElementById('login').style.display="none";
+document.getElementById('panel').style.display="block";
+}else{
+alert("Incorrecto");
+}
+}
 
 /* VENDER */
 window.vender = async function(){
@@ -46,8 +72,24 @@ await updateDoc(doc(db,"rifa","datos"),{
 });
 }
 
-/* VER LISTA */
+/* FONDO */
+window.guardarFondo = async function(){
+let url=document.getElementById('fondo').value;
+
+await setDoc(doc(db,"rifa","datos"),{
+fondo:url
+},{merge:true});
+}
+
+/* VER LISTA TOGGLE */
+let visible=false;
 window.verLista = function(){
+
+visible=!visible;
+document.getElementById('lista').style.display=visible?"block":"none";
+
+if(!visible)return;
+
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 let data=docu.data()||{};
 let html="";
@@ -59,6 +101,34 @@ html+=num+" - "+(data[num]||"Disponible")+"<br>";
 
 document.getElementById('lista').innerHTML=html;
 });
+}
+
+/* FINALIZAR + EXCEL */
+window.finalizar = async function(){
+
+let docu = await getDoc(doc(db,"rifa","datos"));
+let data = docu.data()||{};
+
+let csv="Numero,Nombre\n";
+
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+if(data[num]){
+csv+=num+","+data[num]+"\n";
+}
+}
+
+/* DESCARGA */
+let blob = new Blob([csv], { type: 'text/csv' });
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "ventas.csv";
+a.click();
+
+/* RESET */
+await setDoc(doc(db,"rifa","datos"),{}, {merge:false});
+
+alert("Rifa finalizada y reiniciada");
 }
 </script>
 
