@@ -7,30 +7,21 @@
 <style>
 body{
 margin:0;
+background:black;
 color:white;
 font-family:Arial;
-background:black;
-background-size:cover;
-background-position:center;
+text-align:center;
 }
 
-h1{color:gold;text-align:center}
+h1{color:gold}
 
-/* CONTENEDOR */
-.container{
-display:flex;
-justify-content:center;
-gap:30px;
-flex-wrap:wrap;
-}
-
-/* GRILLA */
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
 gap:8px;
 width:95vw;
 max-width:520px;
+margin:auto;
 }
 
 .cell{
@@ -39,40 +30,12 @@ display:flex;
 align-items:center;
 justify-content:center;
 border-radius:10px;
-background:#00c853;
+background:#00a844;
 font-weight:bold;
-box-shadow:0 0 10px #00ff88;
 }
 
-.sold{background:#d50000}
-
-/* PANEL DERECHO */
-.panel{
-max-width:260px;
-}
-
-/* POZO */
-.pozo-box{
-border:2px solid gold;
-padding:10px;
-border-radius:10px;
-text-align:center;
-margin-bottom:10px;
-}
-
-/* MARCA */
-.marca{
-color:gold;
-text-align:center;
-font-size:20px;
-margin-top:10px;
-}
-
-/* DIAMANTE */
-.diamante{
-text-align:center;
-font-size:30px;
-margin-top:5px;
+.sold{
+background:#d50000;
 }
 </style>
 </head>
@@ -81,59 +44,34 @@ margin-top:5px;
 
 <h1>🎰 RIFA 463 🎰</h1>
 
-<div class="container">
+<p>Vendidos: <span id="count">0</span></p>
 
 <div class="grid" id="grid"></div>
-
-<div class="panel">
-
-<div class="pozo-box">
-<h3>💰 POZO</h3>
-<h2 id="pozo">$50.000</h2>
-</div>
-
-<p><b>Vendidos: <span id="count">0</span></b></p>
-
-<p>
-Valor de Pozo según cantidad de números vendidos:<br><br>
-0 a 49 vendidos → $50.000<br>
-50 a 99 vendidos → $150.000<br>
-100 vendidos → $250.000
-</p>
-
-<div class="marca">Ksino Ely</div>
-<div class="diamante">💎 463</div>
-
-</div>
-
-</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig={
-apiKey:"AIzaSyB2bsxvhoYZWGmDSIYQoQ7v7cC8QXYRFTc",
-authDomain:"rifa-d7efe.firebaseapp.com",
-projectId:"rifa-d7efe"
+const firebaseConfig = {
+apiKey:"AIzaSyDIjZRr3gKoNtWzlP9zWtiRBaRKgWwQ770",
+authDomain:"elyrifa-5e8ce.firebaseapp.com",
+projectId:"elyrifa-5e8ce"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const grid=document.getElementById('grid');
-const count=document.getElementById('count');
-const pozo=document.getElementById('pozo');
+const grid = document.getElementById("grid");
+const count = document.getElementById("count");
 
-/* DIBUJAR */
 function dibujar(data={}){
-
 grid.innerHTML="";
 let vendidos=0;
 
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-let div=document.createElement('div');
+
+let div=document.createElement("div");
 div.className="cell";
 
 if(data[num]){
@@ -148,24 +86,14 @@ grid.appendChild(div);
 }
 
 count.textContent=vendidos;
-
-/* POZO */
-let p=50000;
-if(vendidos==100)p=250000;
-else if(vendidos>=50)p=150000;
-
-pozo.textContent="$"+p.toLocaleString();
 }
+
+/* DIBUJO INICIAL */
+dibujar();
 
 /* TIEMPO REAL */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
-let data = docu.data() || {};
-dibujar(data);
-
-/* FONDO DESDE ADMIN */
-if(data.fondo){
-document.body.style.backgroundImage = `url('${data.fondo}')`;
-}
+dibujar(docu.data()||{});
 });
 </script>
 
