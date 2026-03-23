@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
-<body style="margin:0;font-family:Arial;background:black;color:white;text-align:center;">
+<body style="background:black;color:white;text-align:center;font-family:Arial">
 
 <div id="login">
-<h2 style="color:gold;">🔒 Ksino Ely Admin</h2>
+<h2>🔒 Acceso Admin</h2>
+<input id="user" placeholder="Usuario"><br><br>
 <input id="pass" type="password" placeholder="Contraseña"><br><br>
 <button onclick="login()">Ingresar</button>
 </div>
 
 <div id="panel" style="display:none;">
 
-<h2 style="color:gold;">🎰 PANEL ADMIN 🎰</h2>
+<h2>🔐 ADMIN</h2>
 
 <input id="nombre" placeholder="Nombre"><br><br>
 <input id="numero" placeholder="Numero 00-99"><br><br>
@@ -21,7 +22,14 @@
 
 <br><br>
 
-<div id="lista" style="max-width:300px;margin:auto;text-align:left;"></div>
+<!-- NUEVO -->
+<h3>🖼️ Fondo</h3>
+<input type="file" id="fondoInput"><br><br>
+<button onclick="subirFondo()">Cambiar Fondo</button>
+
+<br><br>
+
+<div id="lista"></div>
 
 </div>
 
@@ -38,13 +46,19 @@ projectId:"elyrifa-5e8ce"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+let usuarioActual = "";
+
 /* LOGIN */
 window.login = function(){
-if(document.getElementById("pass").value==="1991$"){
+let u = user.value;
+let p = pass.value;
+
+if((u==="admin1" && p==="1991$") || (u==="admin2" && p==="463$")){
+usuarioActual = u;
 login.style.display="none";
 panel.style.display="block";
 }else{
-alert("Contraseña incorrecta");
+alert("Datos incorrectos");
 }
 }
 
@@ -52,7 +66,10 @@ alert("Contraseña incorrecta");
 window.vender = async function(){
 let n=nombre.value;
 let num=numero.value.padStart(2,'0');
-await setDoc(doc(db,"rifa","datos"),{[num]:n},{merge:true});
+
+await setDoc(doc(db,"rifa","datos"),{
+[num]: {nombre:n, vendedor:usuarioActual}
+},{merge:true});
 }
 
 /* BORRAR */
@@ -66,11 +83,13 @@ window.finalizar = async function(){
 let docu = await getDoc(doc(db,"rifa","datos"));
 let data = docu.data() || {};
 
-let csv="Numero,Nombre\n";
+let csv="Numero,Nombre,Vendedor\n";
 
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-if(data[num]) csv+=num+","+data[num]+"\n";
+if(data[num]){
+csv+=num+","+data[num].nombre+","+data[num].vendedor+"\n";
+}
 }
 
 let blob=new Blob([csv],{type:'text/csv'});
@@ -84,14 +103,35 @@ await setDoc(doc(db,"rifa","datos"),{}, {merge:false});
 alert("Rifa reiniciada");
 }
 
+/* FONDO */
+window.subirFondo = function(){
+let file = fondoInput.files[0];
+
+let reader = new FileReader();
+reader.onload = async function(e){
+await setDoc(doc(db,"rifa","config"),{
+fondo:e.target.result
+});
+alert("Fondo actualizado");
+}
+reader.readAsDataURL(file);
+}
+
 /* LISTA */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 let data=docu.data()||{};
 let html="";
+
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-html+=num+" - "+(data[num]||"Disponible")+"<br>";
+
+if(data[num]){
+html+=num+" - "+data[num].nombre+" ("+data[num].vendedor+")<br>";
+}else{
+html+=num+" - Disponible<br>";
 }
+}
+
 lista.innerHTML=html;
 });
 </script>
