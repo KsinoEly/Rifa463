@@ -2,6 +2,14 @@
 <html>
 <body style="background:black;color:white;text-align:center;font-family:Arial">
 
+<div id="login">
+<h2>🔒 Acceso Admin</h2>
+<input id="pass" type="password" placeholder="Contraseña"><br><br>
+<button onclick="login()">Ingresar</button>
+</div>
+
+<div id="panel" style="display:none;">
+
 <h2>🔐 ADMIN</h2>
 
 <input id="nombre" placeholder="Nombre"><br><br>
@@ -16,6 +24,8 @@
 <h3>📋 Lista</h3>
 <div id="lista"></div>
 
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, updateDoc, deleteField, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -28,6 +38,18 @@ projectId:"elyrifa-5e8ce"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+/* LOGIN */
+window.login = function(){
+let pass = document.getElementById("pass").value;
+
+if(pass === "1991$"){
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
+}else{
+alert("Contraseña incorrecta");
+}
+}
 
 /* VENDER */
 window.vender = async function(){
@@ -54,7 +76,6 @@ window.finalizar = async function(){
 let docu = await getDoc(doc(db,"rifa","datos"));
 let data = docu.data() || {};
 
-/* CSV */
 let csv="Numero,Nombre\n";
 
 for(let i=0;i<100;i++){
@@ -64,14 +85,12 @@ csv+=num+","+data[num]+"\n";
 }
 }
 
-/* DESCARGAR */
 let blob = new Blob([csv], { type: 'text/csv' });
 let a = document.createElement("a");
 a.href = URL.createObjectURL(blob);
 a.download = "ventas.csv";
 a.click();
 
-/* RESET */
 await setDoc(doc(db,"rifa","datos"),{}, {merge:false});
 
 alert("Rifa finalizada y reiniciada");
