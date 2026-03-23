@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Rifa 463</title>
+<title>Ksino Ely</title>
 
 <style>
 body{
@@ -14,18 +14,22 @@ text-align:center;
 transition:0.5s;
 }
 
-h1{
-color:gold;
-font-size:28px;
-}
-
+/* TITULO */
 .brand{
 color:gold;
-font-size:26px;
+font-size:30px;
 font-weight:bold;
+margin-top:15px;
+}
+
+/* SUBTITULO */
+.sub{
+color:gold;
+font-size:22px;
 margin-bottom:15px;
 }
 
+/* CONTENEDOR */
 .center{
 display:flex;
 flex-direction:column;
@@ -33,26 +37,21 @@ align-items:center;
 gap:15px;
 }
 
-.info{
-background:white;
-color:black;
-padding:15px;
-border-radius:10px;
-font-size:16px;
-max-width:300px;
-}
-
+/* POZO DESTACADO */
 .pozo-box{
 border:2px solid gold;
-padding:12px;
-border-radius:10px;
-font-size:18px;
+padding:15px;
+border-radius:12px;
+font-size:22px;
+box-shadow:0 0 10px rgba(255,215,0,0.4);
 }
 
+/* VENDIDOS */
 .stats{
 font-size:18px;
 }
 
+/* GRILLA */
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
@@ -76,6 +75,16 @@ font-size:16px;
 background:#d50000;
 }
 
+/* VALOR POZO (SOLO BORDE) */
+.info{
+border:2px solid white;
+padding:15px;
+border-radius:10px;
+font-size:15px;
+max-width:320px;
+margin-top:10px;
+}
+
 /* BOTON AUDIO */
 .audio-btn{
 position:fixed;
@@ -93,11 +102,26 @@ cursor:pointer;
 
 <body>
 
-<h1>🎰 RIFA 463 🎰</h1>
 <div class="brand">✨ Ksino Ely ✨</div>
+<div class="sub">💎 463 💎</div>
 
 <div class="center">
 
+<!-- POZO -->
+<div class="pozo-box">
+💰 Pozo<br>
+<span id="pozo">$50.000</span>
+</div>
+
+<!-- VENDIDOS -->
+<div class="stats">
+Vendidos: <span id="count">0</span>
+</div>
+
+<!-- GRILLA -->
+<div class="grid" id="grid"></div>
+
+<!-- VALOR POZO ABAJO -->
 <div class="info">
 <b>Valor del Pozo:</b><br><br>
 0 a 49 vendidos → $50.000<br>
@@ -105,20 +129,9 @@ cursor:pointer;
 100 vendidos → $250.000
 </div>
 
-<div class="pozo-box">
-💰 Pozo<br>
-<span id="pozo">$50.000</span>
 </div>
 
-<div class="stats">
-Vendidos: <span id="count">0</span>
-</div>
-
-<div class="grid" id="grid"></div>
-
-</div>
-
-<!-- 🔊 AUDIO (USANDO .OGG PARA QUE FUNCIONE SEGURO) -->
+<!-- AUDIO -->
 <audio id="musica" loop>
   <source src="musica.ogg" type="audio/ogg">
 </audio>
@@ -148,7 +161,7 @@ const pozo = document.getElementById("pozo");
 
 let ultimoVendidos = 0;
 
-/* ACTIVAR MUSICA */
+/* AUDIO */
 window.activarAudio = function(){
 let audio = document.getElementById("musica");
 audio.volume = 0.25;
@@ -177,7 +190,7 @@ div.innerText=num;
 grid.appendChild(div);
 }
 
-/* SONIDO VENTA */
+/* SONIDO */
 if(vendidos > ultimoVendidos){
 let s = document.getElementById("ventaSound");
 s.volume = 0.5;
@@ -203,7 +216,7 @@ onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 dibujar(docu.data()||{});
 });
 
-/* FONDO DINAMICO */
+/* FONDO */
 onSnapshot(doc(db,"rifa","config"),(docu)=>{
 let data = docu.data();
 if(data && data.fondo){
