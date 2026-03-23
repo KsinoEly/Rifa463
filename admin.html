@@ -9,6 +9,7 @@
 
 <button onclick="vender()">➕ Vender</button>
 <button onclick="borrar()">➖ Liberar</button>
+<button onclick="finalizar()">🏁 Finalizar</button>
 
 <br><br>
 
@@ -17,7 +18,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, updateDoc, deleteField, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, updateDoc, deleteField, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey:"AIzaSyDIjZRr3gKoNtWzlP9zWtiRBaRKgWwQ770",
@@ -47,7 +48,36 @@ await updateDoc(doc(db,"rifa","datos"),{
 });
 }
 
-/* LISTA EN VIVO */
+/* FINALIZAR */
+window.finalizar = async function(){
+
+let docu = await getDoc(doc(db,"rifa","datos"));
+let data = docu.data() || {};
+
+/* CSV */
+let csv="Numero,Nombre\n";
+
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+if(data[num]){
+csv+=num+","+data[num]+"\n";
+}
+}
+
+/* DESCARGAR */
+let blob = new Blob([csv], { type: 'text/csv' });
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "ventas.csv";
+a.click();
+
+/* RESET */
+await setDoc(doc(db,"rifa","datos"),{}, {merge:false});
+
+alert("Rifa finalizada y reiniciada");
+}
+
+/* LISTA */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 let data=docu.data()||{};
 let html="";
