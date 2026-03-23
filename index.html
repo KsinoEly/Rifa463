@@ -15,6 +15,12 @@ text-align:center;
 
 h1{color:gold}
 
+.brand{
+color:gold;
+font-size:20px;
+margin-bottom:10px;
+}
+
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
@@ -43,6 +49,7 @@ background:#d50000;
 <body>
 
 <h1>🎰 RIFA 463 🎰</h1>
+<div class="brand">✨ Ksino Ely ✨</div>
 
 <p>Vendidos: <span id="count">0</span></p>
 
@@ -105,10 +112,8 @@ else if(vendidos>=50)p=150000;
 pozo.textContent="$"+p.toLocaleString();
 }
 
-/* INICIAL */
 dibujar();
 
-/* TIEMPO REAL */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 dibujar(docu.data()||{});
 });
