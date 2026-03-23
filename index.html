@@ -7,28 +7,18 @@
 <style>
 body{
 margin:0;
-font-family:Arial;
+background:black;
 color:white;
+font-family:Arial;
 text-align:center;
-background:url("FONDO.jpg") no-repeat center center fixed;
-background-size:cover;
-backdrop-filter: blur(6px);
+transition:0.5s;
 }
 
-.overlay{
-background:rgba(0,0,0,0.75);
-min-height:100vh;
-padding:20px;
-}
-
-h1{
-color:gold;
-margin:5px;
-}
+h1{color:gold}
 
 .brand{
-font-size:22px;
 color:gold;
+font-size:20px;
 margin-bottom:10px;
 }
 
@@ -36,24 +26,20 @@ margin-bottom:10px;
 display:flex;
 justify-content:center;
 align-items:flex-start;
-gap:30px;
+gap:40px;
 flex-wrap:wrap;
 }
 
-/* IZQUIERDA */
 .info{
-max-width:250px;
+max-width:220px;
 text-align:left;
 font-size:14px;
 }
 
-/* DERECHA */
 .stats{
-max-width:200px;
 text-align:center;
 }
 
-/* POZO */
 .pozo-box{
 border:2px solid gold;
 padding:10px;
@@ -61,12 +47,12 @@ border-radius:10px;
 margin-bottom:10px;
 }
 
-/* GRILLA */
 .grid{
 display:grid;
 grid-template-columns:repeat(10,1fr);
-gap:6px;
-max-width:400px;
+gap:8px;
+width:95vw;
+max-width:520px;
 }
 
 .cell{
@@ -74,22 +60,20 @@ aspect-ratio:1;
 display:flex;
 align-items:center;
 justify-content:center;
-border-radius:8px;
+border-radius:10px;
 background:#1f7a4d;
 font-weight:bold;
 }
 
 .sold{
-background:#c62828;
+background:#d50000;
 }
 </style>
 </head>
 
 <body>
 
-<div class="overlay">
-
-<h1>💎 463 💎</h1>
+<h1>🎰 RIFA 463 🎰</h1>
 <div class="brand">✨ Ksino Ely ✨</div>
 
 <div class="container">
@@ -117,8 +101,6 @@ background:#c62828;
 
 </div>
 
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -136,6 +118,7 @@ const grid = document.getElementById("grid");
 const count = document.getElementById("count");
 const pozo = document.getElementById("pozo");
 
+/* DIBUJAR */
 function dibujar(data={}){
 grid.innerHTML="";
 let vendidos=0;
@@ -159,6 +142,7 @@ grid.appendChild(div);
 
 count.textContent=vendidos;
 
+/* POZO */
 let p=50000;
 if(vendidos==100)p=250000;
 else if(vendidos>=50)p=150000;
@@ -166,10 +150,20 @@ else if(vendidos>=50)p=150000;
 pozo.textContent="$"+p.toLocaleString();
 }
 
+/* INICIAL */
 dibujar();
 
+/* DATOS EN TIEMPO REAL */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 dibujar(docu.data()||{});
+});
+
+/* FONDO DINÁMICO */
+onSnapshot(doc(db,"rifa","config"),(docu)=>{
+let data = docu.data();
+if(data && data.fondo){
+document.body.style.background = `url(${data.fondo}) center/cover fixed`;
+}
 });
 </script>
 
