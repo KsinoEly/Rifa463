@@ -14,37 +14,43 @@ text-align:center;
 transition:0.5s;
 }
 
-h1{color:gold}
+h1{
+color:gold;
+font-size:28px;
+}
 
 .brand{
 color:gold;
-font-size:20px;
-margin-bottom:10px;
+font-size:26px;
+font-weight:bold;
+margin-bottom:15px;
 }
 
-.container{
+.center{
 display:flex;
-justify-content:center;
-align-items:flex-start;
-gap:40px;
-flex-wrap:wrap;
+flex-direction:column;
+align-items:center;
+gap:15px;
 }
 
 .info{
-max-width:220px;
-text-align:left;
-font-size:14px;
-}
-
-.stats{
-text-align:center;
+background:white;
+color:black;
+padding:15px;
+border-radius:10px;
+font-size:16px;
+max-width:300px;
 }
 
 .pozo-box{
 border:2px solid gold;
-padding:10px;
+padding:12px;
 border-radius:10px;
-margin-bottom:10px;
+font-size:18px;
+}
+
+.stats{
+font-size:18px;
 }
 
 .grid{
@@ -63,10 +69,24 @@ justify-content:center;
 border-radius:10px;
 background:#1f7a4d;
 font-weight:bold;
+font-size:16px;
 }
 
 .sold{
 background:#d50000;
+}
+
+/* BOTON AUDIO */
+.audio-btn{
+position:fixed;
+bottom:10px;
+right:10px;
+background:gold;
+border:none;
+padding:10px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
 }
 </style>
 </head>
@@ -76,9 +96,8 @@ background:#d50000;
 <h1>🎰 RIFA 463 🎰</h1>
 <div class="brand">✨ Ksino Ely ✨</div>
 
-<div class="container">
+<div class="center">
 
-<!-- IZQUIERDA -->
 <div class="info">
 <b>Valor del Pozo:</b><br><br>
 0 a 49 vendidos → $50.000<br>
@@ -86,20 +105,29 @@ background:#d50000;
 100 vendidos → $250.000
 </div>
 
-<!-- GRILLA -->
-<div class="grid" id="grid"></div>
-
-<!-- DERECHA -->
-<div class="stats">
 <div class="pozo-box">
 💰 Pozo<br>
 <span id="pozo">$50.000</span>
 </div>
 
-<p>Vendidos: <span id="count">0</span></p>
+<div class="stats">
+Vendidos: <span id="count">0</span>
 </div>
 
+<div class="grid" id="grid"></div>
+
 </div>
+
+<!-- 🔊 AUDIO (USANDO .OGG PARA QUE FUNCIONE SEGURO) -->
+<audio id="musica" loop>
+  <source src="musica.ogg" type="audio/ogg">
+</audio>
+
+<audio id="ventaSound">
+  <source src="win.ogg" type="audio/ogg">
+</audio>
+
+<button class="audio-btn" onclick="activarAudio()">🔊 Música</button>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -117,6 +145,15 @@ const db = getFirestore(app);
 const grid = document.getElementById("grid");
 const count = document.getElementById("count");
 const pozo = document.getElementById("pozo");
+
+let ultimoVendidos = 0;
+
+/* ACTIVAR MUSICA */
+window.activarAudio = function(){
+let audio = document.getElementById("musica");
+audio.volume = 0.25;
+audio.play();
+}
 
 /* DIBUJAR */
 function dibujar(data={}){
@@ -140,6 +177,14 @@ div.innerText=num;
 grid.appendChild(div);
 }
 
+/* SONIDO VENTA */
+if(vendidos > ultimoVendidos){
+let s = document.getElementById("ventaSound");
+s.volume = 0.5;
+s.play();
+}
+ultimoVendidos = vendidos;
+
 count.textContent=vendidos;
 
 /* POZO */
@@ -153,12 +198,12 @@ pozo.textContent="$"+p.toLocaleString();
 /* INICIAL */
 dibujar();
 
-/* DATOS EN TIEMPO REAL */
+/* TIEMPO REAL */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 dibujar(docu.data()||{});
 });
 
-/* FONDO DINÁMICO */
+/* FONDO DINAMICO */
 onSnapshot(doc(db,"rifa","config"),(docu)=>{
 let data = docu.data();
 if(data && data.fondo){
