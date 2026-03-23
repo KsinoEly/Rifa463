@@ -4,7 +4,6 @@
 
 <div id="login">
 <h2>🔒 Acceso Admin</h2>
-<input id="user" placeholder="Usuario"><br><br>
 <input id="pass" type="password" placeholder="Contraseña"><br><br>
 <button onclick="login()">Ingresar</button>
 </div>
@@ -22,7 +21,6 @@
 
 <br><br>
 
-<!-- NUEVO -->
 <h3>🖼️ Fondo</h3>
 <input type="file" id="fondoInput"><br><br>
 <button onclick="subirFondo()">Cambiar Fondo</button>
@@ -46,35 +44,31 @@ projectId:"elyrifa-5e8ce"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let usuarioActual = "";
-
-/* LOGIN */
+/* LOGIN SIMPLE */
 window.login = function(){
-let u = user.value;
-let p = pass.value;
+let p = document.getElementById("pass").value;
 
-if((u==="admin1" && p==="1991$") || (u==="admin2" && p==="463$")){
-usuarioActual = u;
-login.style.display="none";
-panel.style.display="block";
+if(p === "1991$"){
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
 }else{
-alert("Datos incorrectos");
+alert("Contraseña incorrecta");
 }
 }
 
 /* VENDER */
 window.vender = async function(){
-let n=nombre.value;
-let num=numero.value.padStart(2,'0');
+let n=document.getElementById('nombre').value;
+let num=document.getElementById('numero').value.padStart(2,'0');
 
 await setDoc(doc(db,"rifa","datos"),{
-[num]: {nombre:n, vendedor:usuarioActual}
+[num]: {nombre:n}
 },{merge:true});
 }
 
 /* BORRAR */
 window.borrar = async function(){
-let num=numero.value.padStart(2,'0');
+let num=document.getElementById('numero').value.padStart(2,'0');
 await updateDoc(doc(db,"rifa","datos"),{[num]:deleteField()});
 }
 
@@ -83,12 +77,12 @@ window.finalizar = async function(){
 let docu = await getDoc(doc(db,"rifa","datos"));
 let data = docu.data() || {};
 
-let csv="Numero,Nombre,Vendedor\n";
+let csv="Numero,Nombre\n";
 
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 if(data[num]){
-csv+=num+","+data[num].nombre+","+data[num].vendedor+"\n";
+csv+=num+","+data[num].nombre+"\n";
 }
 }
 
@@ -105,7 +99,7 @@ alert("Rifa reiniciada");
 
 /* FONDO */
 window.subirFondo = function(){
-let file = fondoInput.files[0];
+let file = document.getElementById("fondoInput").files[0];
 
 let reader = new FileReader();
 reader.onload = async function(e){
@@ -126,13 +120,13 @@ for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 
 if(data[num]){
-html+=num+" - "+data[num].nombre+" ("+data[num].vendedor+")<br>";
+html+=num+" - "+data[num].nombre+"<br>";
 }else{
 html+=num+" - Disponible<br>";
 }
 }
 
-lista.innerHTML=html;
+document.getElementById("lista").innerHTML=html;
 });
 </script>
 
