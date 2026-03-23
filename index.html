@@ -46,6 +46,15 @@ background:#d50000;
 
 <p>Vendidos: <span id="count">0</span></p>
 
+<h3>💰 Pozo: <span id="pozo">$50.000</span></h3>
+
+<p>
+Valor de Pozo según cantidad de números vendidos:<br><br>
+0 a 49 vendidos → $50.000<br>
+50 a 99 vendidos → $150.000<br>
+100 vendidos → $250.000
+</p>
+
 <div class="grid" id="grid"></div>
 
 <script type="module">
@@ -63,6 +72,7 @@ const db = getFirestore(app);
 
 const grid = document.getElementById("grid");
 const count = document.getElementById("count");
+const pozo = document.getElementById("pozo");
 
 function dibujar(data={}){
 grid.innerHTML="";
@@ -86,9 +96,16 @@ grid.appendChild(div);
 }
 
 count.textContent=vendidos;
+
+/* POZO */
+let p=50000;
+if(vendidos==100)p=250000;
+else if(vendidos>=50)p=150000;
+
+pozo.textContent="$"+p.toLocaleString();
 }
 
-/* DIBUJO INICIAL */
+/* INICIAL */
 dibujar();
 
 /* TIEMPO REAL */
