@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
-<body style="background:black;color:white;text-align:center;font-family:Arial">
+<body style="margin:0;font-family:Arial;background:black;color:white;text-align:center;">
 
 <div id="login">
-<h2>🔒 Acceso Admin</h2>
+<h2 style="color:gold;">🔒 Ksino Ely Admin</h2>
 <input id="pass" type="password" placeholder="Contraseña"><br><br>
 <button onclick="login()">Ingresar</button>
 </div>
 
 <div id="panel" style="display:none;">
 
-<h2>🔐 ADMIN</h2>
+<h2 style="color:gold;">🎰 PANEL ADMIN 🎰</h2>
 
 <input id="nombre" placeholder="Nombre"><br><br>
 <input id="numero" placeholder="Numero 00-99"><br><br>
@@ -21,8 +21,7 @@
 
 <br><br>
 
-<h3>📋 Lista</h3>
-<div id="lista"></div>
+<div id="lista" style="max-width:300px;margin:auto;text-align:left;"></div>
 
 </div>
 
@@ -41,11 +40,9 @@ const db = getFirestore(app);
 
 /* LOGIN */
 window.login = function(){
-let pass = document.getElementById("pass").value;
-
-if(pass === "1991$"){
-document.getElementById("login").style.display="none";
-document.getElementById("panel").style.display="block";
+if(document.getElementById("pass").value==="1991$"){
+login.style.display="none";
+panel.style.display="block";
 }else{
 alert("Contraseña incorrecta");
 }
@@ -53,26 +50,19 @@ alert("Contraseña incorrecta");
 
 /* VENDER */
 window.vender = async function(){
-let nombre=document.getElementById('nombre').value;
-let numero=document.getElementById('numero').value.padStart(2,'0');
-
-await setDoc(doc(db,"rifa","datos"),{
-[numero]:nombre
-},{merge:true});
+let n=nombre.value;
+let num=numero.value.padStart(2,'0');
+await setDoc(doc(db,"rifa","datos"),{[num]:n},{merge:true});
 }
 
 /* BORRAR */
 window.borrar = async function(){
-let numero=document.getElementById('numero').value.padStart(2,'0');
-
-await updateDoc(doc(db,"rifa","datos"),{
-[numero]:deleteField()
-});
+let num=numero.value.padStart(2,'0');
+await updateDoc(doc(db,"rifa","datos"),{[num]:deleteField()});
 }
 
 /* FINALIZAR */
 window.finalizar = async function(){
-
 let docu = await getDoc(doc(db,"rifa","datos"));
 let data = docu.data() || {};
 
@@ -80,33 +70,29 @@ let csv="Numero,Nombre\n";
 
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
-if(data[num]){
-csv+=num+","+data[num]+"\n";
-}
+if(data[num]) csv+=num+","+data[num]+"\n";
 }
 
-let blob = new Blob([csv], { type: 'text/csv' });
-let a = document.createElement("a");
-a.href = URL.createObjectURL(blob);
-a.download = "ventas.csv";
+let blob=new Blob([csv],{type:'text/csv'});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="ventas.csv";
 a.click();
 
 await setDoc(doc(db,"rifa","datos"),{}, {merge:false});
 
-alert("Rifa finalizada y reiniciada");
+alert("Rifa reiniciada");
 }
 
 /* LISTA */
 onSnapshot(doc(db,"rifa","datos"),(docu)=>{
 let data=docu.data()||{};
 let html="";
-
 for(let i=0;i<100;i++){
 let num=i.toString().padStart(2,'0');
 html+=num+" - "+(data[num]||"Disponible")+"<br>";
 }
-
-document.getElementById('lista').innerHTML=html;
+lista.innerHTML=html;
 });
 </script>
 
